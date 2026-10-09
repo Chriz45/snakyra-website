@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Snakyra</title>
+<meta name="description" content="Snakyra: Snake, neu gedacht. Jede Runde malt einen Run-Graph, jeder Tag füllt dein Spieljahr. Für iPhone.">
+<meta name="theme-color" content="#0b0f14">
+<link rel="icon" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>Snakyra</a>
+    <nav class="nav" aria-label="Hauptnavigation">
+      <a href="support.html">Support</a>
+      <a href="datenschutz.html">Datenschutz</a>
+      <a href="privacy.html" lang="en">English</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <div>
+      <p class="eyebrow">$ git checkout snake</p>
+      <h1>Snake, das Spuren hinterlässt.</h1>
+      <p class="lead">Der Klassiker von 1997, neu gedacht. Jeder Zug färbt das Feld, jede Runde wird zu deinem Run-Graph, jeder Tag füllt dein Spieljahr.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="support.html">Support &amp; Fragen</a>
+        <span class="soon">Bald im App Store für iPhone</span>
+      </div>
+    </div>
+    <figure class="board" style="margin:0">
+      <canvas id="demo" width="450" height="600" aria-label="Animierte Vorschau: Eine Schlange zieht über ein Raster und hinterlässt eine grüne Spur"></canvas>
+      <figcaption class="board-meta"><span>Spur = Heatmap</span><span id="demoScore">0 Commits</span></figcaption>
+    </figure>
+  </section>
+
+  <section class="features" aria-label="Funktionen">
+    <article class="feature">
+      <div class="swatch" aria-hidden="true"><i style="background:var(--h1)"></i><i style="background:var(--h2)"></i><i style="background:var(--h3)"></i><i style="background:var(--h4)"></i></div>
+      <h2>Daily Run</h2>
+      <p>Ein Level pro Tag, gleich für alle Spieler weltweit. Ein gewerteter Versuch, eine gemeinsame Rangliste.</p>
+    </article>
+    <article class="feature">
+      <div class="swatch" aria-hidden="true"><i style="background:var(--commit)"></i><i style="background:var(--h4)"></i><i style="background:#a78bfa"></i></div>
+      <h2>Run-Graph</h2>
+      <p>Nach jeder Runde siehst du, wo du warst. Je heller ein Feld, desto öfter bist du drübergefahren.</p>
+    </article>
+    <article class="feature">
+      <div class="swatch" aria-hidden="true"><i style="background:#9bbc0f"></i><i style="background:#306230"></i><i style="background:#0f380f"></i></div>
+      <h2>Classic 1997</h2>
+      <p>Für die Nostalgie: der Original-Modus in LCD-Grün. Keine Werbung, kein Weiterleben gegen Geld.</p>
+    </article>
+  </section>
+</main>
+
+<footer class="site-foot">
+  <div class="wrap">
+    <span>© 2026 Chrizantus Nehring</span>
+    <nav aria-label="Rechtliches">
+      <a href="impressum.html">Impressum</a>
+      <a href="datenschutz.html">Datenschutz</a>
+      <a href="privacy.html" lang="en">Privacy Policy</a>
+      <a href="support.html">Support</a>
+    </nav>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var cv = document.getElementById('demo');
+  var ctx = cv.getContext('2d');
+  var C = 15, R = 20, unit = 30, gap = 5, cell = unit - gap;
+  var heat = ['#161d25', '#0f4a2c', '#1a7a42', '#2fb35c', '#4fe07d'];
+  var visits, snake, dir, food, score;
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var scoreEl = document.getElementById('demoScore');
+
+  function reset() {
+    visits = new Array(C * R).fill(0);
+    snake = [{x: 7, y: 12}, {x: 7, y: 13}, {x: 7, y: 14}];
+    snake.forEach(function (p) { visits[p.y * C + p.x]++; });
+    dir = {x: 0, y: -1};
+    score = 0;
+    placeFood();
+  }
+  function occupied(x, y) { return snake.some(function (p) { return p.x === x && p.y === y; }); }
+  function placeFood() {
+    do { food = {x: Math.floor(Math.random() * C), y: Math.floor(Math.random() * R)}; } while (occupied(food.x, food.y));
+  }
+  function level(n) { return n === 0 ? 0 : n === 1 ? 1 : n <= 3 ? 2 : n <= 6 ? 3 : 4; }
+  function safe(x, y) { return x >= 0 && y >= 0 && x < C && y < R && !occupied(x, y); }
+
+  function choose() {
+    var h = snake[0];
+    var options = [{x: 1, y: 0}, {x: -1, y: 0}, {x: 0, y: 1}, {x: 0, y: -1}].filter(function (d) {
+      return !(d.x === -dir.x && d.y === -dir.y) && safe(h.x + d.x, h.y + d.y);
+    });
+    if (!options.length) return null;
+    options.sort(function (a, b) {
+      var da = Math.abs(h.x + a.x - food.x) + Math.abs(h.y + a.y - food.y);
+      var db = Math.abs(h.x + b.x - food.x) + Math.abs(h.y + b.y - food.y);
+      return da - db + (Math.random() - 0.5) * 0.6;
+    });
+    return options[0];
+  }
+
+  function step() {
+    var d = choose();
+    if (!d || snake.length > 40) { reset(); return; }
+    dir = d;
+    var h = {x: snake[0].x + d.x, y: snake[0].y + d.y};
+    snake.unshift(h);
+    visits[h.y * C + h.x]++;
+    if (h.x === food.x && h.y === food.y) { score++; placeFood(); } else { snake.pop(); }
+  }
+
+  function rr(x, y, w, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + w, r); ctx.arcTo(x + w, y + w, x, y + w, r);
+    ctx.arcTo(x, y + w, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); ctx.fill();
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    var r = cell * 0.26;
+    for (var y = 0; y < R; y++) for (var x = 0; x < C; x++) {
+      ctx.fillStyle = heat[level(visits[y * C + x])];
+      rr(x * unit, y * unit, cell, r);
+    }
+    ctx.shadowColor = 'rgba(240,163,94,.7)'; ctx.shadowBlur = 14;
+    ctx.fillStyle = '#f0a35e'; rr(food.x * unit, food.y * unit, cell, r);
+    for (var i = snake.length - 1; i >= 0; i--) {
+      var p = snake[i];
+      if (i === 0) { ctx.shadowColor = 'rgba(79,224,125,.8)'; ctx.shadowBlur = 16; ctx.fillStyle = '#b8ffd0'; }
+      else { ctx.shadowBlur = 0; var t = i / snake.length; ctx.fillStyle = t < .35 ? '#6cf096' : t < .7 ? '#4fe07d' : '#38c468'; }
+      rr(p.x * unit, p.y * unit, cell, r);
+    }
+    ctx.shadowBlur = 0;
+    scoreEl.textContent = score + (score === 1 ? ' Commit' : ' Commits');
+  }
+
+  reset();
+  if (reduce) {
+    for (var k = 0; k < 120; k++) step();
+    draw();
+    return;
+  }
+  for (var k2 = 0; k2 < 40; k2++) step();
+  draw();
+  setInterval(function () { step(); draw(); }, 140);
+})();
+</script>
+</body>
+</html>
