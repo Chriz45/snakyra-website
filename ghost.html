@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Snakyra Geister-Duell</title>
+<meta name="description" content="Einladung zu einem Geister-Duell in Snakyra.">
+<meta name="theme-color" content="#0b0f14">
+<meta name="robots" content="noindex">
+<link rel="icon" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<style>
+  .invite { max-width: 520px; margin: 0 auto; padding-block: 56px 72px; text-align: center; }
+  .live-dot { display: inline-flex; align-items: center; gap: 8px; font: 700 13px/1 var(--mono); color: var(--commit); }
+  .live-dot::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--commit); }
+  .invite h1 { font: 700 clamp(34px, 7vw, 46px)/1.05 var(--sans); letter-spacing: -1px; margin: 16px 0 12px; text-wrap: balance; }
+  .invite p { color: #c9d4de; margin: 0 auto 24px; max-width: 40ch; }
+  .code { background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 18px; margin: 0 0 20px; }
+  .code small { display: block; font: 12px/1 var(--mono); color: var(--muted); margin-bottom: 8px; }
+  .code strong { font: 700 40px/1.1 var(--mono); letter-spacing: 4px; }
+  .invite .btn { width: 100%; justify-content: center; }
+  .steps { text-align: left; color: var(--muted); font-size: 15px; margin-top: 28px; padding-left: 20px; }
+  .steps li { margin-bottom: 6px; }
+</style>
+</head>
+<body>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>Snakyra</a>
+    <nav class="nav" aria-label="Hauptnavigation">
+      <a href="support.html">Support</a>
+      <a href="datenschutz.html">Datenschutz</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap invite">
+  <span class="live-dot">GEISTER-DUELL</span>
+  <h1 id="title">Du wirst zu einem Geister-Duell herausgefordert</h1>
+  <p>Du fährst dasselbe Level, die Runde deines Gegners läuft als Geist mit. Ganz ohne Termin, über alle Zeitzonen hinweg.</p>
+
+  <a class="btn btn-primary" id="open" href="#">In Snakyra öffnen</a>
+
+  <ol class="steps">
+    <li>Tippe auf „In Snakyra öffnen“.</li>
+    <li>Klappt das nicht, öffne diesen Link auf dem iPhone, auf dem Snakyra installiert ist.</li>
+    <li>Noch kein Snakyra? Die App kommt bald in den App Store für iPhone.</li>
+  </ol>
+</main>
+
+<footer class="site-foot">
+  <div class="wrap">
+    <span>© 2026 Chrizantus Nehring</span>
+    <nav aria-label="Rechtliches">
+      <a href="impressum.html">Impressum</a>
+      <a href="datenschutz.html">Datenschutz</a>
+      <a href="support.html">Support</a>
+    </nav>
+  </div>
+</footer>
+
+<script>
+(function () {
+  // Die Runde steckt im Link hinter dem #, sie wird nie an einen Server geschickt.
+  var hash = location.hash.replace(/^#/, '');
+  var params = new URLSearchParams(hash);
+  var code = (params.get('g') || '').replace(/[^A-Za-z0-9_-]/g, '');
+  var app = 'snakyra://ghost?g=' + code;
+  var link = document.getElementById('open');
+  link.href = app;
+  if (code.length > 20) {
+    setTimeout(function () { location.href = app; }, 300);
+  }
+})();
+</script>
+</body>
+</html>
